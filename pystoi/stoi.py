@@ -1,6 +1,6 @@
 import numpy as np
 import scipy
-from librosa import resample
+from resampy import resample
 import utils
 
 # Constant definition

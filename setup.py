@@ -8,5 +8,5 @@ setup(
     url='https://github.com/mpariente/pystoi',
     license='MIT',
     packages=['pystoi'],
-    install_requires=['numpy', 'scipy', 'librosa']
+    install_requires=['numpy', 'scipy', 'resampy']
 )

@@ -28,20 +28,38 @@ def test_fft():
     assert_allclose(fft, fft_m, atol=ATOL)
 
 
-def test_resample():
+def test_resampy():
     """ Compare matlab and librosa resample : Doesn't pass """
-    from librosa import resample
+    from resampy import resample
     from pystoi.stoi import FS
     import matlab_wrapper
     matlab = matlab_wrapper.MatlabSession()
     matlab.put('FS', float(FS))
+    RTOL = 1e-4
     for fs in [8000, 11025, 16000, 22050, 32000, 44100, 48000]:
         x = np.random.randn(2*fs,)
         x_r = resample(x, fs, FS)
         matlab.put('x', x)
         matlab.put('fs', float(fs))
         matlab.eval('x_r = resample(x, FS, fs)')
-        assert_allclose(x_r, matlab.get('x_r'), atol=ATOL)
+        assert_allclose(x_r, matlab.get('x_r'), atol=ATOL, rtol=RTOL)
+
+
+def test_nnresample():
+    """ Compare matlab and nnresample resample : Doesn't pass """
+    from nnresample import resample
+    from pystoi.stoi import FS
+    import matlab_wrapper
+    matlab = matlab_wrapper.MatlabSession()
+    matlab.put('FS', float(FS))
+    RTOL = 1e-4
+    for fs in [8000, 11025, 16000, 22050, 32000, 44100, 48000]:
+        x = np.random.randn(2*fs,)
+        x_r = resample(x, FS, fs)
+        matlab.put('x', x)
+        matlab.put('fs', float(fs))
+        matlab.eval('x_r = resample(x, FS, fs)')
+        assert_allclose(x_r, matlab.get('x_r'), atol=ATOL, rtol=RTOL)
 
 
 if __name__ == '__main__':
