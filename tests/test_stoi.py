@@ -15,7 +15,7 @@ eng.cd('matlab/')
 
 def test_stoi_good_fs():
     """
-    Note : Here we don't use absolute tolerance because the scale is unstable
+    Note : Here we don't only use absolute tolerance because the scale is unstable
     and the source of difference between the original and this STOI is the
     resampling method. So we use a relative tolerance of 0.01%
     """
@@ -28,9 +28,9 @@ def test_stoi_good_fs():
     assert_allclose(stoi_out, stoi_out_m, atol=ATOL, rtol=RTOL)
 
 
-def test_stoi_down_sample():
+def test_stoi_downsample():
     """
-    Note : Here we don't use absolute tolerance because the scale is unstable
+    Note : Here we don't only use absolute tolerance because the scale is unstable
     and the source of difference between the original and this STOI is the
     resampling method. So we use a relative tolerance of 0.01%
     """
@@ -46,10 +46,10 @@ def test_stoi_down_sample():
 
 def test_stoi_upsample():
     """
-    Note : Here we don't use absolute tolerance because the scale is unstable
+    Note : Here we don't only use absolute tolerance because the scale is unstable
     and the source of difference between the original and this STOI is the
     resampling method. So we use a relative tolerance of 0.01%
-    DOESNT PASS
+    FAILING
     """
     for fs in [8000]:
         x = np.random.randn(2*fs, )

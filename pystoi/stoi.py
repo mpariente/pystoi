@@ -20,7 +20,7 @@ def stoi(x, y, fs_sig):
     Computes the STOI (See [1][2]) of a denoised signal compared to a
     clean signal, The output is expected to have a monotonic
     relation with the subjective speech-intelligibility, where a higher d
-    denotint better speech intelligibility
+    denotes better speech intelligibility
 
     # Arguments
         x : clean original speech

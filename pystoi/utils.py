@@ -91,7 +91,7 @@ def remove_silent_frames(x, y, dyn_range, framelen, hop):
 
 
 def corr(x, y):
-    """ Returns correlation coefficient between x and y """
+    """ Returns correlation coefficient between x and y (1-D)"""
     new_x = x - np.mean(x)
     new_x /= np.sqrt(np.sum(np.square(new_x)))
     new_y = y - np.mean(y)

@@ -42,6 +42,16 @@ Any contribution are welcome, specially to improve the execution speed of the co
 * Vectorize `utils.remove_silent_frames`
 * Vectorize OBM matrix multiplication in `stoi.stoi`
 
+* Improve the resampling method to match Matlab's resampling in `tests/`
+
+### Limits
+
+The method is based on audio signal sampled at 10kHz (this is not the problem), so any audio file sampled at a different sampling rate will be resampled. However there is no equivalent of Matlab's resampling in Python, so :
+
+* The tests on an initial sampling rate of 8kHz are failing (corresponds to upsampling)
+* The tests on resampling (both with `resampy` and `nnresample`) are failing when compared to Matlab
+
+**Key message** : All the variability in the estimation of the STOI by this package (compared to the original Matlab function) is due to the resampling method. 
 
 ### References
 * [1] C.H.Taal, R.C.Hendriks, R.Heusdens, J.Jensen 'A Short-Time
