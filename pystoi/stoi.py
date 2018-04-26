@@ -40,7 +40,7 @@ def stoi(x, y, fs_sig, extended=False):
             Intelligibility Prediction of Time-Frequency Weighted Noisy Speech',
             IEEE Transactions on Audio, Speech, and Language Processing, 2011.
         [3] Jesper Jensen and Cees H. Taal, 'An Algorithm for Predicting the
-            Intelligibility of Speech Masked by Modulated Noise Maskers', 
+            Intelligibility of Speech Masked by Modulated Noise Maskers',
             IEEE Transactions on Audio, Speech and Language Processing, 2016.
     """
     if x.shape != y.shape:
@@ -75,7 +75,7 @@ def stoi(x, y, fs_sig, extended=False):
         if extended:
             x_n = utils.row_col_normalize(x_seg)
             y_n = utils.row_col_normalize(y_seg)
-            interm_meas[m-N] = np.sum(x_n.flatten(order='F') * y_n.flatten()) / N
+            interm_meas[m-N] = np.sum(x_n * y_n / N)
         else:
             alpha = np.sqrt(np.sum(np.square(x_seg), 1) / np.sum(np.square(y_seg), 1))
             a_y_seg = np.multiply(y_seg.transpose(), alpha).transpose()

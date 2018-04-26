@@ -110,10 +110,10 @@ def row_col_normalize(x):
     """ Row and column mean and variance normalize a 2D matrix """
     # Row mean and variance normalization
     x_normed = x + EPS * np.random.standard_normal(x.shape)
-    x_normed -= np.mean(x_normed, axis=-1, keep_dims=True)
+    x_normed -= np.mean(x_normed, axis=-1, keepdims=True)
     x_normed = np.matmul(np.diag(1. / np.sqrt(vect_two_norm(x_normed))), x_normed)
     # Column mean and variance normalization
     x_normed += + EPS * np.random.standard_normal(x_normed.shape)
-    x_normed -= np.mean(x_normed, axis=0, keep_dims=True)
+    x_normed -= np.mean(x_normed, axis=0, keepdims=True)
     x_normed = np.matmul(x_normed, np.diag(1. / np.sqrt(vect_two_norm(x_normed, axis=0))))
     return x_normed
