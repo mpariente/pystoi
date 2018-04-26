@@ -47,7 +47,7 @@ def stoi(x, y, fs_sig):
         x = resample(x, fs_sig, FS)
         y = resample(y, fs_sig, FS)
     # Remove silent frames
-    x, y = utils.remove_silent_frames(x, y, DYN_RANGE, N_FRAME, N_FRAME/2)
+    x, y = utils.remove_silent_frames(x, y, DYN_RANGE, N_FRAME, int(N_FRAME/2))
     # Take STFT
     x_spec = utils.stft(x, N_FRAME, NFFT, overlap=2).transpose()
     y_spec = utils.stft(y, N_FRAME, NFFT, overlap=2).transpose()

@@ -14,7 +14,7 @@ def thirdoct(fs, nfft, num_bands, min_freq):
         cf : center frequencies
     """
     f = np.linspace(0, fs, nfft + 1)
-    f = f[:nfft/2 + 1]
+    f = f[:int(nfft/2) + 1]
     k = np.array(range(num_bands)).astype(float)
     cf = np.power(2. ** (1. / 3), k) * min_freq
     freq_low = min_freq * np.power(2., (2 * k -1 ) / 6)
@@ -44,7 +44,7 @@ def stft(x, win_size, fft_size, overlap=4):
     # Returns
         stft_out : 2D complex array, the STFT of x.
     """
-    hop = win_size / overlap
+    hop = int(win_size / overlap)
     w = scipy.hanning(win_size + 2)[1: -1]  # = matlab.hanning(win_size)
     stft_out = np.array([np.fft.rfft(w * x[i:i + win_size], n=fft_size)
                         for i in range(0, len(x) - win_size, hop)])
@@ -69,7 +69,7 @@ def remove_silent_frames(x, y, dyn_range, framelen, hop):
     """
     # Compute Mask
     w = scipy.hanning(framelen + 2)[1:-1]
-    mask = np.array([20 * np.log10(np.linalg.norm(w * x[i:i + framelen]))
+    mask = np.array([20 * np.log10(np.linalg.norm(w * x[i:i + framelen]) + np.finfo("float").eps)
                     for i in range(0, len(x) - framelen, hop)])
     mask += dyn_range - np.max(mask)
     mask = mask > 0
