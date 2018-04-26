@@ -23,6 +23,16 @@ def test_stoi_good_fs():
     assert_allclose(stoi_out, stoi_out_m, atol=ATOL, rtol=RTOL)
 
 
+def test_estoi_good_fs():
+    x = np.random.randn(2*FS, )
+    y = np.random.randn(2*FS, )
+    estoi_out = stoi(x, y, FS, extended=True)
+    x_m = matlab.double(list(x))
+    y_m = matlab.double(list(y))
+    estoi_out_m = eng.estoi(x_m, y_m, float(FS))
+    assert_allclose(estoi_out, estoi_out_m, atol=ATOL, rtol=RTOL)
+
+
 def test_stoi_downsample():
     """ FAILING BECAUSE OF RESAMPLING """
     for fs in [11025, 16000, 22050, 32000, 44100, 48000]:

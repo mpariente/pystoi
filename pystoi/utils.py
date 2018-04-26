@@ -1,6 +1,7 @@
 import numpy as np
 import scipy
 
+EPS = np.finfo("float").eps
 
 def thirdoct(fs, nfft, num_bands, min_freq):
     """ Returns the 1/3 octave band matrix and its center frequencies
@@ -69,8 +70,7 @@ def remove_silent_frames(x, y, dyn_range, framelen, hop):
     """
     # Compute Mask
     w = scipy.hanning(framelen + 2)[1:-1]
-    mask = np.array([20 * np.log10(np.linalg.norm(w * x[i:i + framelen])
-                                   + np.finfo("float").eps)
+    mask = np.array([20 * np.log10(np.linalg.norm(w * x[i:i + framelen]) + EPS)
                      for i in range(0, len(x) - framelen, hop)])
     mask += dyn_range - np.max(mask)
     mask = mask > 0
@@ -99,3 +99,21 @@ def corr(x, y):
     new_y /= np.sqrt(np.sum(np.square(new_y)))
     rho = np.sum(new_x * new_y)
     return rho
+
+
+def vect_two_norm(x, axis=-1):
+    """ Returns a vectors of norms of the rows of a matrix """
+    return np.sum(np.square(x), axis=axis)
+
+
+def row_col_normalize(x):
+    """ Row and column mean and variance normalize a 2D matrix """
+    # Row mean and variance normalization
+    x_normed = x + EPS * np.random.standard_normal(x.shape)
+    x_normed -= np.mean(x_normed, axis=-1, keepdims=True)
+    x_normed = np.matmul(np.diag(1. / np.sqrt(vect_two_norm(x_normed))), x_normed)
+    # Column mean and variance normalization
+    x_normed += + EPS * np.random.standard_normal(x_normed.shape)
+    x_normed -= np.mean(x_normed, axis=0, keepdims=True)
+    x_normed = np.matmul(x_normed, np.diag(1. / np.sqrt(vect_two_norm(x_normed, axis=0))))
+    return x_normed
