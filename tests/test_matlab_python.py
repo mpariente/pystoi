@@ -29,7 +29,7 @@ def test_fft():
 
 
 def test_resampy():
-    """ Compare matlab and librosa resample : Doesn't pass """
+    """ Compare matlab and librosa resample : FAILING """
     from resampy import resample
     from pystoi.stoi import FS
     import matlab_wrapper
@@ -46,7 +46,7 @@ def test_resampy():
 
 
 def test_nnresample():
-    """ Compare matlab and nnresample resample : Doesn't pass """
+    """ Compare matlab and nnresample resample : FAILING """
     from nnresample import resample
     from pystoi.stoi import FS
     import matlab_wrapper

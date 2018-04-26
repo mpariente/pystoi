@@ -8,9 +8,8 @@ Description taken from [Cees Taal's website](http://www.ceestaal.nl/code/)
 
 ### Install
 
-`pip install pystoi`   
-Note : This is a Python 2.7 package as `matlab_wrapper` (used for testing) is only compatible with Python 2.7
-
+`pip install pystoi` or
+`pip3 install pystoi`
 
 ### Usage
 ```
@@ -19,6 +18,8 @@ from pystoi.stoi import stoi
 
 fs, clean = read('path/to/clean/audio')
 fs, den = read('path/to/denoised/audio')
+
+# Clean and den should have the same length, and be 1D
 d = stoi(clean, den, fs)
 ```
 
@@ -28,7 +29,8 @@ All the Matlab code in this repo is taken from or adapted from the code availabl
 
 Thanks to Cees Taal who open-sourced his Matlab implementation and enabled thorough testing of this python code.
 
-If you want to run the tests, you will need Matlab, `matlab.engine` (install instructions [here](https://fr.mathworks.com/help/matlab/matlab_external/install-the-matlab-engine-for-python.html)) and `matlab_wrapper` (install with `pip install matlab_wrapper`)
+If you want to run the tests, you will need Matlab, `matlab.engine` (install instructions [here](https://fr.mathworks.com/help/matlab/matlab_external/install-the-matlab-engine-for-python.html)) and `matlab_wrapper` (install with `pip install matlab_wrapper`).
+The tests can only be ran under Python 2.7 as `matlab.engine` and `matlab_wrapper` are only compatible with Python2.7
 
 ### Contribute
 
@@ -36,17 +38,17 @@ Any contribution are welcome, specially to improve the execution speed of the co
 * Vectorize `utils.interm_si_measure` with a matrix correlation
 * Vectorize `utils.remove_silent_frames`
 * Vectorize OBM matrix multiplication in `stoi.stoi`
-
 * Improve the resampling method to match Matlab's resampling in `tests/`
+* Write tests for Python 3 (with [`transplant`](https://github.com/bastibe/transplant) for example)
 
 ### Limits
 
-The method is based on audio signal sampled at 10kHz (this is not the problem), so any audio file sampled at a different sampling rate will be resampled. However there is no equivalent of Matlab's resampling in Python, so :
+The method is based on audio signal sampled at 10kHz (this is not the problem), so any audio file sampled at a different sampling rate will be resampled to 10kHz. However there is no equivalent of Matlab's resampling in Python, so :
 
-* The tests on an initial sampling rate of 8kHz are failing (corresponds to upsampling)
+* The tests on an initial sampling rate different than 10kHz are failing.
 * The tests on resampling (both with `resampy` and `nnresample`) are failing when compared to Matlab
 
-**Key message** : All the variability in the estimation of the STOI by this package (compared to the original Matlab function) is due to the resampling method.
+**Key message** : All the variability in the estimation of the STOI by this package (compared to the original Matlab function) is due to the resampling method. This is a fully tested behavior.
 
 ### References
 * [1] C.H.Taal, R.C.Hendriks, R.Heusdens, J.Jensen 'A Short-Time
