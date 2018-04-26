@@ -69,8 +69,9 @@ def remove_silent_frames(x, y, dyn_range, framelen, hop):
     """
     # Compute Mask
     w = scipy.hanning(framelen + 2)[1:-1]
-    mask = np.array([20 * np.log10(np.linalg.norm(w * x[i:i + framelen]) + np.finfo("float").eps)
-                    for i in range(0, len(x) - framelen, hop)])
+    mask = np.array([20 * np.log10(np.linalg.norm(w * x[i:i + framelen])
+                                   + np.finfo("float").eps)
+                     for i in range(0, len(x) - framelen, hop)])
     mask += dyn_range - np.max(mask)
     mask = mask > 0
     # Remove silent frames
