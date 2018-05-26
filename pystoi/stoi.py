@@ -1,7 +1,7 @@
 import numpy as np
 import scipy
 from resampy import resample
-import utils
+from . import utils
 
 # Constant definition
 FS = 10000                          # Sampling frequency
