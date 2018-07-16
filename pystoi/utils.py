@@ -3,6 +3,7 @@ import scipy
 
 EPS = np.finfo("float").eps
 
+
 def thirdoct(fs, nfft, num_bands, min_freq):
     """ Returns the 1/3 octave band matrix and its center frequencies
     # Arguments :
@@ -70,24 +71,31 @@ def remove_silent_frames(x, y, dyn_range, framelen, hop):
     """
     # Compute Mask
     w = scipy.hanning(framelen + 2)[1:-1]
-    mask = np.array([20 * np.log10(np.linalg.norm(w * x[i:i + framelen]) + EPS)
-                     for i in range(0, len(x) - framelen, hop)])
-    mask += dyn_range - np.max(mask)
-    mask = mask > 0
-    # Remove silent frames
-    count = 0
-    x_sil = np.zeros(x.shape)
-    y_sil = np.zeros(y.shape)
-    for i in range(mask.shape[0]):
-        if mask[i]:
-            sil_ind = range(count * hop, count * hop + framelen)
-            ind = range(i * hop, i * hop + framelen)
-            x_sil[sil_ind] += x[ind] * w
-            y_sil[sil_ind] += y[ind] * w
-            count += 1
-    # Cut unused length
-    x_sil = x_sil[:sil_ind[-1] + 1]
-    y_sil = y_sil[:sil_ind[-1] + 1]
+
+    x_frames = np.array(
+        [w * x[i:i + framelen] for i in range(0, len(x) - framelen, hop)])
+    y_frames = np.array(
+        [w * y[i:i + framelen] for i in range(0, len(x) - framelen, hop)])
+
+    # Compute energies in dB
+    x_energies = 20 * np.log10(np.linalg.norm(x_frames, axis=1) + EPS)
+
+    # Find boolean mask of energies lower than dynamic_range dB
+    # with respect to maximum clean speech energy frame
+    mask = (np.max(x_energies) - dyn_range - x_energies) < 0
+
+    # Remove silent frames by masking
+    x_frames = x_frames[mask]
+    y_frames = y_frames[mask]
+
+    # init zero arrays to hold x, y with silent frames removed
+    x_sil = np.zeros((mask.shape[0] - 1) * hop + framelen)
+    y_sil = np.zeros((mask.shape[0] - 1) * hop + framelen)
+
+    for i in range(x_frames.shape[0]):
+        x_sil[range(i * hop, i * hop + framelen)] += x_frames[i, :]
+        y_sil[range(i * hop, i * hop + framelen)] += y_frames[i, :]
+
     return x_sil, y_sil
 
 
