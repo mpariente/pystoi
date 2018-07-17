@@ -1,5 +1,4 @@
 import numpy as np
-import scipy
 from resampy import resample
 from . import utils
 
@@ -70,8 +69,9 @@ def stoi(x, y, fs_sig, extended=False):
         [y_tob[:, m - N:m] for m in range(N, x_tob.shape[1] + 1)])
 
     if extended:
-        # placeholder for extended STOI
-        pass
+        x_n = utils.row_col_normalize(x_segments)
+        y_n = utils.row_col_normalize(y_segments)
+        return np.sum(x_n * y_n / N) / x_n.shape[0]
 
     else:
         # Find normalization constants and normalize
@@ -82,7 +82,8 @@ def stoi(x, y, fs_sig, extended=False):
 
         # Clip as described in [1]
         clip_value = 10 ** (-BETA / 20)
-        y_primes = np.minimum(y_segments_normalized, x_segments * (1 + clip_value))
+        y_primes = np.minimum(
+            y_segments_normalized, x_segments * (1 + clip_value))
 
         # Subtract mean vectors
         y_primes = y_primes - np.mean(y_primes, axis=2, keepdims=True)
