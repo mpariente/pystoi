@@ -3,7 +3,6 @@ import scipy
 
 EPS = np.finfo("float").eps
 
-
 def thirdoct(fs, nfft, num_bands, min_freq):
     """ Returns the 1/3 octave band matrix and its center frequencies
     # Arguments :
@@ -71,53 +70,50 @@ def remove_silent_frames(x, y, dyn_range, framelen, hop):
     """
     # Compute Mask
     w = scipy.hanning(framelen + 2)[1:-1]
-
-    x_frames = np.array(
-        [w * x[i:i + framelen] for i in range(0, len(x) - framelen, hop)])
-    y_frames = np.array(
-        [w * y[i:i + framelen] for i in range(0, len(x) - framelen, hop)])
-
-    # Compute energies in dB
-    x_energies = 20 * np.log10(np.linalg.norm(x_frames, axis=1) + EPS)
-
-    # Find boolean mask of energies lower than dynamic_range dB
-    # with respect to maximum clean speech energy frame
-    mask = (np.max(x_energies) - dyn_range - x_energies) < 0
-
-    # Remove silent frames by masking
-    x_frames = x_frames[mask]
-    y_frames = y_frames[mask]
-
-    # init zero arrays to hold x, y with silent frames removed
-    x_sil = np.zeros((mask.shape[0] - 1) * hop + framelen)
-    y_sil = np.zeros((mask.shape[0] - 1) * hop + framelen)
-
-    for i in range(x_frames.shape[0]):
-        x_sil[range(i * hop, i * hop + framelen)] += x_frames[i, :]
-        y_sil[range(i * hop, i * hop + framelen)] += y_frames[i, :]
-
+    mask = np.array([20 * np.log10(np.linalg.norm(w * x[i:i + framelen]) + EPS)
+                     for i in range(0, len(x) - framelen, hop)])
+    mask += dyn_range - np.max(mask)
+    mask = mask > 0
+    # Remove silent frames
+    count = 0
+    x_sil = np.zeros(x.shape)
+    y_sil = np.zeros(y.shape)
+    for i in range(mask.shape[0]):
+        if mask[i]:
+            sil_ind = range(count * hop, count * hop + framelen)
+            ind = range(i * hop, i * hop + framelen)
+            x_sil[sil_ind] += x[ind] * w
+            y_sil[sil_ind] += y[ind] * w
+            count += 1
+    # Cut unused length
+    x_sil = x_sil[:sil_ind[-1] + 1]
+    y_sil = y_sil[:sil_ind[-1] + 1]
     return x_sil, y_sil
 
 
+def corr(x, y):
+    """ Returns correlation coefficient between x and y (1-D)"""
+    new_x = x - np.mean(x)
+    new_x /= np.sqrt(np.sum(np.square(new_x)))
+    new_y = y - np.mean(y)
+    new_y /= np.sqrt(np.sum(np.square(new_y)))
+    rho = np.sum(new_x * new_y)
+    return rho
+
+
 def vect_two_norm(x, axis=-1):
-    """ Returns an array of vectors of norms of the rows of matrices from 3D array """
-    return np.sum(np.square(x), axis=axis, keepdims=True)
+    """ Returns a vectors of norms of the rows of a matrix """
+    return np.sum(np.square(x), axis=axis)
 
 
 def row_col_normalize(x):
-    """ Row and column mean and variance normalize an array of 2D segments """
+    """ Row and column mean and variance normalize a 2D matrix """
     # Row mean and variance normalization
     x_normed = x + EPS * np.random.standard_normal(x.shape)
     x_normed -= np.mean(x_normed, axis=-1, keepdims=True)
-    x_inv = 1. / np.sqrt(vect_two_norm(x_normed))
-    x_diags = np.array(
-        [np.diag(x_inv[i].reshape(-1)) for i in range(x_inv.shape[0])])
-    x_normed = np.matmul(x_diags, x_normed)
+    x_normed = np.matmul(np.diag(1. / np.sqrt(vect_two_norm(x_normed))), x_normed)
     # Column mean and variance normalization
     x_normed += + EPS * np.random.standard_normal(x_normed.shape)
-    x_normed -= np.mean(x_normed, axis=1, keepdims=True)
-    x_inv = 1. / np.sqrt(vect_two_norm(x_normed, axis=1))
-    x_diags = np.array(
-        [np.diag(x_inv[i].reshape(-1)) for i in range(x_inv.shape[0])])
-    x_normed = np.matmul(x_normed, x_diags)
+    x_normed -= np.mean(x_normed, axis=0, keepdims=True)
+    x_normed = np.matmul(x_normed, np.diag(1. / np.sqrt(vect_two_norm(x_normed, axis=0))))
     return x_normed
