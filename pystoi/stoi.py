@@ -1,4 +1,5 @@
 import numpy as np
+import scipy
 from resampy import resample
 from . import utils
 
@@ -45,61 +46,41 @@ def stoi(x, y, fs_sig, extended=False):
     if x.shape != y.shape:
         raise Exception('x and y should have the same length,' +
                         'found {} and {}'.format(len(x), len(y)))
-
     # Resample is fs_sig is different than fs
     if fs_sig != FS:
         x = resample(x, fs_sig, FS)
         y = resample(y, fs_sig, FS)
-
     # Remove silent frames
     x, y = utils.remove_silent_frames(x, y, DYN_RANGE, N_FRAME, int(N_FRAME/2))
-
     # Take STFT
     x_spec = utils.stft(x, N_FRAME, NFFT, overlap=2).transpose()
     y_spec = utils.stft(y, N_FRAME, NFFT, overlap=2).transpose()
-
+    # Init third octave band TF representation
+    x_tob = np.zeros((NUMBAND, x_spec.shape[1]))
+    y_tob = np.zeros((NUMBAND, y_spec.shape[1]))
     # Apply OB matrix to the spectrograms as in Eq. (1)
-    x_tob = np.sqrt(np.matmul(OBM, np.square(np.abs(x_spec))))
-    y_tob = np.sqrt(np.matmul(OBM, np.square(np.abs(y_spec))))
-
-    # Take segments of x_tob, y_tob
-    x_segments = np.array(
-        [x_tob[:, m - N:m] for m in range(N, x_tob.shape[1] + 1)])
-    y_segments = np.array(
-        [y_tob[:, m - N:m] for m in range(N, x_tob.shape[1] + 1)])
+    for i in range(x_tob.shape[1]):
+        x_tob[:, i] = np.sqrt(np.matmul(OBM, np.square(np.abs(x_spec[:, i]))))
+        y_tob[:, i] = np.sqrt(np.matmul(OBM, np.square(np.abs(y_spec[:, i]))))
 
     if extended:
-        x_n = utils.row_col_normalize(x_segments)
-        y_n = utils.row_col_normalize(y_segments)
-        return np.sum(x_n * y_n / N) / x_n.shape[0]
-
+        interm_meas = np.zeros((x_tob.shape[1] - N + 1, ))
     else:
-        # Find normalization constants and normalize
-        normalization_consts = (
-            np.linalg.norm(x_segments, axis=2, keepdims=True) /
-            np.linalg.norm(y_segments, axis=2, keepdims=True))
-        y_segments_normalized = y_segments * normalization_consts
+        interm_meas = np.zeros((NUMBAND, x_tob.shape[1] - N + 1))
+        clip = 10**(-BETA/20)
 
-        # Clip as described in [1]
-        clip_value = 10 ** (-BETA / 20)
-        y_primes = np.minimum(
-            y_segments_normalized, x_segments * (1 + clip_value))
-
-        # Subtract mean vectors
-        y_primes = y_primes - np.mean(y_primes, axis=2, keepdims=True)
-        x_segments = x_segments - np.mean(x_segments, axis=2, keepdims=True)
-
-        # Divide by their norms
-        y_primes /= np.linalg.norm(y_primes, axis=2, keepdims=True)
-        x_segments /= np.linalg.norm(x_segments, axis=2, keepdims=True)
-
-        # Find a matrix with entries summing to sum of correlations of vectors
-        correlations_components = y_primes * x_segments
-
-        # J, M as in [1], eq.6
-        J = x_segments.shape[0]
-        M = x_segments.shape[1]
-
-        # Find the mean of all correlations
-        d = np.sum(correlations_components) / (J * M)
-        return d
+    for m in range(N, x_tob.shape[1] + 1):
+        x_seg = x_tob[:, m-N:m]
+        y_seg = y_tob[:, m-N:m]
+        if extended:
+            x_n = utils.row_col_normalize(x_seg)
+            y_n = utils.row_col_normalize(y_seg)
+            interm_meas[m-N] = np.sum(x_n * y_n / N)
+        else:
+            alpha = np.sqrt(np.sum(np.square(x_seg), 1) / np.sum(np.square(y_seg), 1))
+            a_y_seg = np.multiply(y_seg.transpose(), alpha).transpose()
+            for j in range(NUMBAND):
+                Y_prime = np.minimum(a_y_seg[j, :], x_seg[j, :] * (1 + clip))
+                interm_meas[j, m-N] = utils.corr(x_seg[j, :], Y_prime[:])
+    d = np.mean(interm_meas)
+    return d
