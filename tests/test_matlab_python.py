@@ -10,7 +10,6 @@ ATOL = 1e-5
 eng = matlab.engine.start_matlab()
 eng.cd('matlab/')
 
-
 def test_hanning():
     hanning = scipy.hanning(N_FRAME+2)[1:-1]
     hanning_m = eng.hanning(float(N_FRAME))

@@ -11,7 +11,6 @@ ATOL = 1e-5
 eng = matlab.engine.start_matlab()
 eng.cd('matlab/')
 
-
 def test_thirdoct():
     obm_m, cf_m = eng.thirdoct(float(FS), float(NFFT), float(NUMBAND),
                                float(MINFREQ), nargout=2)
@@ -44,16 +43,6 @@ def test_removesf():
     xs_m, ys_m = np.array(xs_m._data), np.array(ys_m._data)
     assert_allclose(xs, xs_m, atol=ATOL)
     assert_allclose(ys, ys_m, atol=ATOL)
-
-
-def test_corr():
-    x = np.random.randn(2*FS, )
-    y = np.random.randn(2*FS, )
-    x_m = matlab.double(list(x))
-    y_m = matlab.double(list(y))
-    rho = corr(x, y)
-    rho_m = eng.taa_corr(x_m, y_m)
-    assert_allclose(rho, rho_m, atol=ATOL)
 
 
 def test_apply_OBM():

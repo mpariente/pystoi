@@ -77,7 +77,6 @@ def test_stoi_matlab_resample():
         stoi_out_m = matlab.eval('stoi_out_m = stoi(x_r, y_r, FS)')
         assert_allclose(stoi_out, matlab.get('stoi_out_m'), atol=ATOL, rtol=RTOL)
 
-
 """
 Conclusion :
     The source of difference between the original Matlab and this STOI is the
