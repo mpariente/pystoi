@@ -34,12 +34,11 @@ The tests can only be ran under Python 2.7 as `matlab.engine` and `matlab_wrappe
 
 ### Contribute
 
-Any contribution are welcome, specially to improve the execution speed of the code :
-* Vectorize `utils.interm_si_measure` with a matrix correlation
-* Vectorize `utils.remove_silent_frames`
-* Vectorize OBM matrix multiplication in `stoi.stoi`
+Any contribution are welcome~~, specially to improve the execution speed of the code~~ (thank you Przemek Pobrotyn for a 4x speed-up!) :
+
 * Improve the resampling method to match Matlab's resampling in `tests/`
 * Write tests for Python 3 (with [`transplant`](https://github.com/bastibe/transplant) for example)
+* Add new speech quality/intelligibility measures (PESQ, STI ...)
 
 ### Limits
 
