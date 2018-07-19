@@ -14,6 +14,7 @@ eng.cd('matlab/')
 
 
 def test_stoi_good_fs():
+    """ Test STOI at sampling frequency of 10kHz. """
     x = np.random.randn(2*FS, )
     y = np.random.randn(2*FS, )
     stoi_out = stoi(x, y, FS)
@@ -24,6 +25,7 @@ def test_stoi_good_fs():
 
 
 def test_estoi_good_fs():
+    """ Test extended STOI at sampling frequency of 10kHz. """
     x = np.random.randn(2*FS, )
     y = np.random.randn(2*FS, )
     estoi_out = stoi(x, y, FS, extended=True)
@@ -34,7 +36,8 @@ def test_estoi_good_fs():
 
 
 def test_stoi_downsample():
-    """ FAILING BECAUSE OF RESAMPLING """
+    """ Test STOI at sampling frequency below 10 kHz.
+        FAILING BECAUSE OF RESAMPLING """
     for fs in [11025, 16000, 22050, 32000, 44100, 48000]:
         x = np.random.randn(2*fs, )
         y = np.random.randn(2*fs, )
@@ -46,7 +49,8 @@ def test_stoi_downsample():
 
 
 def test_stoi_upsample():
-    """ FAILING BECAUSE OF RESAMPLING """
+    """ Test STOI at sampling frequency above 10 kHz.
+        FAILING BECAUSE OF RESAMPLING """
     for fs in [8000]:
         x = np.random.randn(2*fs, )
         y = np.random.randn(2*fs, )
@@ -58,6 +62,8 @@ def test_stoi_upsample():
 
 
 def test_stoi_matlab_resample():
+    """ Test STOI with any sampling frequency, where Matlab is doing
+        all the resampling. Successful test."""
     from pystoi.stoi import FS
     import matlab_wrapper
     matlab = matlab_wrapper.MatlabSession()
@@ -77,6 +83,7 @@ def test_stoi_matlab_resample():
         stoi_out_m = matlab.eval('stoi_out_m = stoi(x_r, y_r, FS)')
         assert_allclose(stoi_out, matlab.get('stoi_out_m'), atol=ATOL, rtol=RTOL)
 
+
 """
 Conclusion :
     The source of difference between the original Matlab and this STOI is the
@@ -84,6 +91,7 @@ Conclusion :
     However, informal tests with actual speech files produce very similar results
     for both implementations.
 """
+
 
 if __name__ == '__main__':
     pytest.main([__file__])

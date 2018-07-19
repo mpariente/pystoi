@@ -10,7 +10,10 @@ ATOL = 1e-5
 eng = matlab.engine.start_matlab()
 eng.cd('matlab/')
 
+
 def test_hanning():
+    """ Compare scipy and Matlab hanning window.
+        Matlab returns a N+2 size window without first and last samples"""
     hanning = scipy.hanning(N_FRAME+2)[1:-1]
     hanning_m = eng.hanning(float(N_FRAME))
     hanning_m = np.array(hanning_m._data)
@@ -35,6 +38,7 @@ def test_resampy():
     matlab = matlab_wrapper.MatlabSession()
     matlab.put('FS', float(FS))
     RTOL = 1e-4
+
     for fs in [8000, 11025, 16000, 22050, 32000, 44100, 48000]:
         x = np.random.randn(2*fs,)
         x_r = resample(x, fs, FS)
@@ -52,6 +56,7 @@ def test_nnresample():
     matlab = matlab_wrapper.MatlabSession()
     matlab.put('FS', float(FS))
     RTOL = 1e-4
+
     for fs in [8000, 11025, 16000, 22050, 32000, 44100, 48000]:
         x = np.random.randn(2*fs,)
         x_r = resample(x, FS, fs)
