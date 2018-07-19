@@ -1,13 +1,4 @@
 function  [A cf] = thirdoct(fs, N_fft, numBands, mn)
-%   [A CF] = THIRDOCT(FS, N_FFT, NUMBANDS, MN) returns 1/3 octave band matrix
-%   inputs:
-%       FS:         samplerate
-%       N_FFT:      FFT size
-%       NUMBANDS:   number of bands
-%       MN:         center frequency of first 1/3 octave band
-%   outputs:
-%       A:          octave band matrix
-%       CF:         center frequencies
 
 f               = linspace(0, fs, N_fft+1);
 f               = f(1:(N_fft/2+1));

@@ -1,9 +1,4 @@
 function [x_sil y_sil] = removeSilentFrames(x, y, range, N, K)
-%   [X_SIL Y_SIL] = REMOVESILENTFRAMES(X, Y, RANGE, N, K) X and Y
-%   are segmented with frame-length N and overlap K, where the maximum energy
-%   of all frames of X is determined, say X_MAX. X_SIL and Y_SIL are the
-%   reconstructed signals, excluding the frames, where the energy of a frame
-%   of X is smaller than X_MAX-RANGE
 
 x       = x(:);
 y       = y(:);
