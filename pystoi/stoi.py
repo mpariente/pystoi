@@ -76,7 +76,7 @@ def stoi(x, y, fs_sig, extended=False):
         # Find normalization constants and normalize
         normalization_consts = (
             np.linalg.norm(x_segments, axis=2, keepdims=True) /
-            np.linalg.norm(y_segments, axis=2, keepdims=True))
+            (np.linalg.norm(y_segments, axis=2, keepdims=True) + utils.EPS))
         y_segments_normalized = y_segments * normalization_consts
 
         # Clip as described in [1]
@@ -91,7 +91,6 @@ def stoi(x, y, fs_sig, extended=False):
         # Divide by their norms
         y_primes /= (np.linalg.norm(y_primes, axis=2, keepdims=True) + utils.EPS)
         x_segments /= (np.linalg.norm(x_segments, axis=2, keepdims=True) + utils.EPS)
-
         # Find a matrix with entries summing to sum of correlations of vectors
         correlations_components = y_primes * x_segments
 
