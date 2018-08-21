@@ -3,7 +3,7 @@ from setuptools import find_packages
 
 setup(
     name='pystoi',
-    version='0.2.0',
+    version='0.2.1',
     description='Computes Short Term Objective Intelligibility measure',
     author='Manuel Pariente',
     author_email='pariente.mnl@gmail.com',
