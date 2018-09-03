@@ -33,8 +33,13 @@ def test_stdft():
 
 
 def test_removesf():
+    # Initialize
     x = np.random.randn(2*FS, )
     y = np.random.randn(2*FS, )
+    # Add silence segment
+    silence = np.zeros(3*N_FFT, )
+    x = np.concatenate([x[:FS], silence, x[FS:]])
+    y = np.concatenate([y[:FS], silence, y[FS:]])
     x_m = matlab.double(list(x))
     y_m = matlab.double(list(y))
     xs, ys = remove_silent_frames(x, y, DYN_RANGE, N_FRAME, N_FRAME/2)
