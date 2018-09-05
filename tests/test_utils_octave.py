@@ -26,7 +26,7 @@ def test_thirdoct():
 
 def test_stdft():
     """Test stdft by comparing to Octave"""
-    x = np.random.randn(2 * FS, )
+    x = np.random.randn(2 * FS)
     spec_m = octave.feval('octave/stdft.m',
                           x, float(N_FRAME), float(N_FRAME/2), float(NFFT))
     spec_m = spec_m[:, 0:(NFFT // 2 + 1)].transpose()
@@ -38,8 +38,8 @@ def test_removesf():
     """Test remove_silent_frames by comparing to Octave"""
 
     # Initialize
-    x = np.random.randn(2 * FS, )
-    y = np.random.randn(2 * FS, )
+    x = np.random.randn(2 * FS)
+    y = np.random.randn(2 * FS)
 
     # Add silence segment
     silence = np.zeros(3 * NFFT, )
@@ -62,7 +62,7 @@ def test_apply_OBM():
     obm_m, _ = octave.feval('octave/thirdoct.m',
                             float(FS), float(NFFT), float(NUMBAND),
                             float(MINFREQ), nout=2)
-    x = np.random.randn(2 * FS, )
+    x = np.random.randn(2 * FS)
     x_tob_m = octave.feval('octave/applyOBM',
                            x, obm_m, float(N_FRAME), float(NFFT),
                            float(NUMBAND))

@@ -1,6 +1,6 @@
 import numpy as np
-from resampy import resample
 from . import utils
+from pystoi.utils import resample_oct
 
 # Constant definition
 FS = 10000                          # Sampling frequency
@@ -47,8 +47,8 @@ def stoi(x, y, fs_sig, extended=False):
 
     # Resample is fs_sig is different than fs
     if fs_sig != FS:
-        x = resample(x, fs_sig, FS)
-        y = resample(y, fs_sig, FS)
+        x = resample_oct(x, FS, fs_sig)
+        y = resample_oct(y, FS, fs_sig)
 
     # Remove silent frames
     x, y = utils.remove_silent_frames(x, y, DYN_RANGE, N_FRAME, int(N_FRAME/2))
