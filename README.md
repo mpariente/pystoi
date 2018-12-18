@@ -11,6 +11,14 @@ Description taken from [Cees Taal's website](http://www.ceestaal.nl/code/)
 `pip install pystoi` or
 `pip3 install pystoi`
 
+Note :
+The package is not up to date on pip (I will do it later), for now, you can install with
+```
+git clone https://github.com/mpariente/pystoi
+cd pystoi/
+pip install .
+```
+
 ### Usage
 ```
 from scipy.io.wavfile import read
@@ -31,6 +39,8 @@ Thanks to Cees Taal who open-sourced his Matlab implementation and enabled thoro
 
 If you want to run the tests, you will need Matlab, `matlab.engine` (install instructions [here](https://fr.mathworks.com/help/matlab/matlab_external/install-the-matlab-engine-for-python.html)) and `matlab_wrapper` (install with `pip install matlab_wrapper`).
 The tests can only be ran under Python 2.7 as `matlab.engine` and `matlab_wrapper` are only compatible with Python2.7
+
+Very big thanks to @gauss256 who translated all the matlab scripts to Octave, and wrote all the tests for it!
 
 ### Contribute
 

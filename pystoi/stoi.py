@@ -43,7 +43,7 @@ def stoi(x, y, fs_sig, extended=False):
     """
     if x.shape != y.shape:
         raise Exception('x and y should have the same length,' +
-                        'found {} and {}'.format(len(x), len(y)))
+                        'found {} and {}'.format(x.shape, y.shape))
 
     # Resample is fs_sig is different than fs
     if fs_sig != FS:
