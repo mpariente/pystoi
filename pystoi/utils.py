@@ -87,8 +87,9 @@ def remove_silent_frames(x, y, dyn_range, framelen, hop):
     y_frames = y_frames[mask]
 
     # init zero arrays to hold x, y with silent frames removed
-    x_sil = np.zeros((mask.shape[0] - 1) * hop + framelen)
-    y_sil = np.zeros((mask.shape[0] - 1) * hop + framelen)
+    n_sil = (len(x_frames) - 1) * hop + framelen
+    x_sil = np.zeros(n_sil)
+    y_sil = np.zeros(n_sil)
 
     for i in range(x_frames.shape[0]):
         x_sil[range(i * hop, i * hop + framelen)] += x_frames[i, :]
