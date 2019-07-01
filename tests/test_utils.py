@@ -3,7 +3,7 @@ import matlab.engine
 import numpy as np
 import scipy
 from numpy.testing import assert_allclose
-from pystoi.utils import thirdoct, stft, remove_silent_frames, corr
+from pystoi.utils import thirdoct, stft, remove_silent_frames
 from pystoi.stoi import FS, N_FRAME, NFFT, NUMBAND, MINFREQ, N, BETA, DYN_RANGE, OBM
 
 ATOL = 1e-5
@@ -37,7 +37,7 @@ def test_removesf():
     x = np.random.randn(2*FS, )
     y = np.random.randn(2*FS, )
     # Add silence segment
-    silence = np.zeros(3*N_FFT, )
+    silence = np.zeros(3*NFFT, )
     x = np.concatenate([x[:FS], silence, x[FS:]])
     y = np.concatenate([y[:FS], silence, y[FS:]])
     x_m = matlab.double(list(x))

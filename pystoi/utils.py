@@ -15,7 +15,7 @@ def _resample_window_oct(p, q):
 
     # Properties of the antialiasing filter
     log10_rejection = -3.0
-    stopband_cutoff_f = 1 / (2 * max(p, q))
+    stopband_cutoff_f = 1. / (2 * max(p, q))
     roll_off_width = stopband_cutoff_f / 10
 
     # Determine filter length

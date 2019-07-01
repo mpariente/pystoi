@@ -25,7 +25,7 @@ def test_fft():
     x_m = matlab.double(list(x))
     fft_m = eng.fft(x_m, NFFT)
     fft_m = np.array(fft_m).transpose()
-    fft_m = fft_m[0:NFFT/2+1, 0]
+    fft_m = fft_m[0:NFFT//2+1, 0]
     fft = np.fft.rfft(x, n=NFFT)
     assert_allclose(fft, fft_m, atol=ATOL)
 
