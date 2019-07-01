@@ -11,14 +11,6 @@ Description taken from [Cees Taal's website](http://www.ceestaal.nl/code/)
 `pip install pystoi` or
 `pip3 install pystoi`
 
-Note :
-The package is not up to date on pip (I will do it later), for now, you can install with
-```
-git clone https://github.com/mpariente/pystoi
-cd pystoi/
-pip install .
-```
-
 ### Usage
 ```
 import soundfile as sf
