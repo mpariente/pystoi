@@ -36,11 +36,9 @@ def test_stdft():
 
 def test_removesf():
     """Test remove_silent_frames by comparing to Octave"""
-
     # Initialize
     x = np.random.randn(2 * FS)
     y = np.random.randn(2 * FS)
-
     # Add silence segment
     silence = np.zeros(3 * NFFT, )
     x = np.concatenate([x[:FS], silence, x[FS:]])

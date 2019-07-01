@@ -3,13 +3,13 @@ from setuptools import find_packages
 
 setup(
     name='pystoi',
-    version='0.2.1',
+    version='0.2.2',
     description='Computes Short Term Objective Intelligibility measure',
     author='Manuel Pariente',
     author_email='pariente.mnl@gmail.com',
     url='https://github.com/mpariente/pystoi',
     license='MIT',
-    install_requires=['numpy', 'scipy', 'resampy'],
+    install_requires=['numpy', 'scipy'],
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Science/Research',
