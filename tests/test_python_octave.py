@@ -12,7 +12,6 @@ from pystoi.utils import resample_oct
 
 ATOL = 1e-5
 
-
 def test_hanning():
     """ Compare scipy and Matlab hanning window.
 
@@ -35,11 +34,9 @@ def test_fft():
 
 def test_resample():
     """ Compare Octave and SciPy resampling.
-
     Both packages use polyphase resampling with a Kaiser window. We use
     the window designed by Octave in the SciPy resampler."""
     RTOL = 1e-4
-
     for fs in [8000, 11025, 16000, 22050, 32000, 44100, 48000]:
         x = np.random.randn(2 * fs)
         octave.eval('pkg load signal')

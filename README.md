@@ -21,14 +21,14 @@ pip install .
 
 ### Usage
 ```
-from scipy.io.wavfile import read
+import soundfile as sf
 from pystoi.stoi import stoi
 
-fs, clean = read('path/to/clean/audio')
-fs, den = read('path/to/denoised/audio')
+clean, fs = sf.read('path/to/clean/audio')
+denoised, fs = sf.read('path/to/denoised/audio')
 
 # Clean and den should have the same length, and be 1D
-d = stoi(clean, den, fs, extended=False)
+d = stoi(clean, denoised, fs, extended=False)
 ```
 
 ### Matlab code & Testing
@@ -39,25 +39,18 @@ Thanks to Cees Taal who open-sourced his Matlab implementation and enabled thoro
 
 If you want to run the tests, you will need Matlab, `matlab.engine` (install instructions [here](https://fr.mathworks.com/help/matlab/matlab_external/install-the-matlab-engine-for-python.html)) and `matlab_wrapper` (install with `pip install matlab_wrapper`).
 The tests can only be ran under Python 2.7 as `matlab.engine` and `matlab_wrapper` are only compatible with Python2.7
+Tests are passing at relative and absolute tolerance of `1e-3`, which is enough for the considered application (all the variability is coming from the resampling method when signals are not natively sampled at 10kHz).
 
 Very big thanks to @gauss256 who translated all the matlab scripts to Octave, and wrote all the tests for it!
 
 ### Contribute
 
-Any contribution are welcome~~, specially to improve the execution speed of the code~~ (thank you Przemek Pobrotyn for a 4x speed-up!) :
+Any contribution are welcome~, specially to improve the execution speed of the code~ (thank you Przemek Pobrotyn for a 4x speed-up!) :
 
-* Improve the resampling method to match Matlab's resampling in `tests/`
+* ~Improve the resampling method to match Matlab's resampling in `tests/`.~ This can be considered a solved issue thanks to @gauss256 !
 * Write tests for Python 3 (with [`transplant`](https://github.com/bastibe/transplant) for example)
 * Add new speech quality/intelligibility measures (PESQ, STI ...)
 
-### Limits
-
-The method is based on audio signal sampled at 10kHz (this is not the problem), so any audio file sampled at a different sampling rate will be resampled to 10kHz. However there is no equivalent of Matlab's resampling in Python, so :
-
-* The tests on an initial sampling rate different than 10kHz are failing.
-* The tests on resampling (both with `resampy` and `nnresample`) are failing when compared to Matlab
-
-**Key message** : All the variability in the estimation of the STOI by this package (compared to the original Matlab function) is due to the resampling method. This is a fully tested behavior.
 
 ### References
 * [1] C.H.Taal, R.C.Hendriks, R.Heusdens, J.Jensen 'A Short-Time

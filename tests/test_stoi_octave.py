@@ -10,7 +10,6 @@ from pystoi.stoi import FS, stoi
 RTOL = 1e-6
 ATOL = 1e-6
 
-
 def test_stoi_good_fs():
     """ Test STOI at sampling frequency of 10kHz. """
     x = np.random.randn(2 * FS)
