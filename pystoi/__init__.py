@@ -1,1 +1,3 @@
-__version__ = '0.2.2'
+from .stoi import stoi
+
+__version__ = '0.3.0'
