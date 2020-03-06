@@ -14,7 +14,7 @@ Description taken from [Cees Taal's website](http://www.ceestaal.nl/code/)
 ### Usage
 ```
 import soundfile as sf
-from pystoi.stoi import stoi
+from pystoi import stoi
 
 clean, fs = sf.read('path/to/clean/audio')
 denoised, fs = sf.read('path/to/denoised/audio')
@@ -41,7 +41,6 @@ Any contribution are welcome~, specially to improve the execution speed of the c
 
 * ~Improve the resampling method to match Matlab's resampling in `tests/`.~ This can be considered a solved issue thanks to @gauss256 !
 * Write tests for Python 3 (with [`transplant`](https://github.com/bastibe/transplant) for example)
-* Add new speech quality/intelligibility measures (PESQ, STI ...)
 
 
 ### References
