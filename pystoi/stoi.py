@@ -56,6 +56,13 @@ def stoi(x, y, fs_sig, extended=False):
     x_spec = utils.stft(x, N_FRAME, NFFT, overlap=2).transpose()
     y_spec = utils.stft(y, N_FRAME, NFFT, overlap=2).transpose()
 
+    # Ensure at least 30 frames for intermediate intelligibility
+    if x_spec.shape[-1] < N:
+        to_concat = np.zeros((x_spec.shape[0], N - x_spec.shape[1]))
+        x_spec = np.concatenate([x_spec, to_concat], axis=1)
+        y_spec = np.concatenate([y_spec, to_concat], axis=1)
+        print(x_spec.shape)
+
     # Apply OB matrix to the spectrograms as in Eq. (1)
     x_tob = np.sqrt(np.matmul(OBM, np.square(np.abs(x_spec))))
     y_tob = np.sqrt(np.matmul(OBM, np.square(np.abs(y_spec))))
