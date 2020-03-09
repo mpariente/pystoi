@@ -1,4 +1,5 @@
 import numpy as np
+import warnings
 from . import utils
 
 # Constant definition
@@ -15,20 +16,24 @@ DYN_RANGE = 40                      # Speech dynamic range
 
 def stoi(x, y, fs_sig, extended=False):
     """ Short term objective intelligibility
-    Computes the STOI (See [1][2]) of a denoised signal compared to a
-    clean signal, The output is expected to have a monotonic
-    relation with the subjective speech-intelligibility, where a higher d
-    denotes better speech intelligibility
+    Computes the STOI (See [1][2]) of a denoised signal compared to a clean
+    signal, The output is expected to have a monotonic relation with the
+    subjective speech-intelligibility, where a higher score denotes better
+    speech intelligibility.
+
     # Arguments
-        x : clean original speech
-        y : denoised speech
-        fs_sig : sampling rate of x and y
-        extended : Boolean, whether to use the extended STOI described in [3]
+        x (np.ndarray): clean original speech
+        y (np.ndarray): denoised speech
+        fs_sig (int): sampling rate of x and y
+        extended (bool): Boolean, whether to use the extended STOI described in [3]
+
     # Returns
-        Short time objective intelligibility measure between clean and denoised
-        speech
+        float: Short time objective intelligibility measure between clean and
+        denoised speech
+
     # Raises
         AssertionError : if x and y have different lengths
+
     # Reference
         [1] C.H.Taal, R.C.Hendriks, R.Heusdens, J.Jensen 'A Short-Time
             Objective Intelligibility Measure for Time-Frequency Weighted Noisy
@@ -58,10 +63,11 @@ def stoi(x, y, fs_sig, extended=False):
 
     # Ensure at least 30 frames for intermediate intelligibility
     if x_spec.shape[-1] < N:
-        to_concat = np.zeros((x_spec.shape[0], N - x_spec.shape[1]))
-        x_spec = np.concatenate([x_spec, to_concat], axis=1)
-        y_spec = np.concatenate([y_spec, to_concat], axis=1)
-        print(x_spec.shape)
+        warnings.warn('Not enough STFT frames to compute intermediate '
+                      'intelligibility measure after removing silent '
+                      'frames. Returning 1e-5. Please check you wav files',
+                      RuntimeWarning)
+        return 1e-5
 
     # Apply OB matrix to the spectrograms as in Eq. (1)
     x_tob = np.sqrt(np.matmul(OBM, np.square(np.abs(x_spec))))
