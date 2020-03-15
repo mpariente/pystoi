@@ -92,7 +92,7 @@ def stft(x, win_size, fft_size, overlap=4):
         stft_out : 2D complex array, the STFT of x.
     """
     hop = int(win_size / overlap)
-    w = scipy.hanning(win_size + 2)[1: -1]  # = matlab.hanning(win_size)
+    w = np.hanning(win_size + 2)[1: -1]  # = matlab.hanning(win_size)
     stft_out = np.array([np.fft.rfft(w * x[i:i + win_size], n=fft_size)
                         for i in range(0, len(x) - win_size, hop)])
     return stft_out
@@ -113,7 +113,7 @@ def remove_silent_frames(x, y, dyn_range, framelen, hop):
         y without the silent frames (aligned to x)
     """
     # Compute Mask
-    w = scipy.hanning(framelen + 2)[1:-1]
+    w = np.hanning(framelen + 2)[1:-1]
 
     x_frames = np.array(
         [w * x[i:i + framelen] for i in range(0, len(x) - framelen, hop)])
