@@ -1,6 +1,6 @@
-import numpy as np
-import scipy
 import functools
+
+import numpy as np
 from scipy.signal import resample_poly
 
 EPS = np.finfo("float").eps
@@ -16,7 +16,7 @@ def _resample_window_oct(p, q):
 
     # Properties of the antialiasing filter
     log10_rejection = -3.0
-    stopband_cutoff_f = 1. / (2 * max(p, q))
+    stopband_cutoff_f = 1.0 / (2 * max(p, q))
     roll_off_width = stopband_cutoff_f / 10
 
     # Determine filter length
@@ -63,12 +63,12 @@ def thirdoct(fs, nfft, num_bands, min_freq):
         cf : center frequencies
     """
     f = np.linspace(0, fs, nfft + 1)
-    f = f[:int(nfft/2) + 1]
+    f = f[: int(nfft / 2) + 1]
     k = np.array(range(num_bands)).astype(float)
-    cf = np.power(2. ** (1. / 3), k) * min_freq
-    freq_low = min_freq * np.power(2., (2 * k -1 ) / 6)
-    freq_high = min_freq * np.power(2., (2 * k + 1) / 6)
-    obm = np.zeros((num_bands, len(f))) # a verifier
+    cf = np.power(2.0 ** (1.0 / 3), k) * min_freq
+    freq_low = min_freq * np.power(2.0, (2 * k - 1) / 6)
+    freq_high = min_freq * np.power(2.0, (2 * k + 1) / 6)
+    obm = np.zeros((num_bands, len(f)))  # a verifier
 
     for i in range(len(cf)):
         # Match 1/3 oct band freq with fft frequency bin
@@ -98,6 +98,36 @@ def stft(x, win_size, fft_size, overlap=4):
     stft_out = np.array([np.fft.rfft(w * x[i:i + win_size], n=fft_size)
                         for i in range(0, len(x) - win_size, hop)])
     return stft_out
+
+
+def _overlap_add(x, framelen, hop):
+    # x.shape = (num_frames, framelen)
+    # Compute the number of segments, per frame.
+    num_frames = len(x)
+    n_sil = (len(x) - 1) * hop + framelen
+    segments = -(-framelen // hop)  # Divide and round up.
+
+    # Pad the frame_length dimension to segments * hop
+    signal = np.pad(x, ((0, segments), (0, segments * hop - framelen)))
+
+    # Reshape to a 3D tensor, splitting the framelen dimension in two
+    signal = signal.reshape((num_frames + segments, segments, hop))
+    # Transpose dimensions so that signal.shape = (segments, frame+segments, hop)
+    signal = np.transpose(signal, [1, 0, 2])
+    # Reshape so that signal.shape = (segments * (frame+segments), hop)
+    signal = signal.reshape((-1, hop))
+
+    # Now here is the magic!! Beware!!
+    # Remove the last n=segments elements from the first axis
+    signal = signal[:-segments]
+    # Reshape to (segments, frame+segments-1, hop)
+    signal = signal.reshape((segments, num_frames + segments - 1, hop))
+    # This has introduced a shift by one
+
+    # Now, reduce over the columns and flatten the array to achieve the result
+    signal = np.sum(signal, axis=0)
+    signal = signal.reshape(-1)[:n_sil]
+    return signal
 
 
 def remove_silent_frames(x, y, dyn_range, framelen, hop):
@@ -133,15 +163,8 @@ def remove_silent_frames(x, y, dyn_range, framelen, hop):
     x_frames = x_frames[mask]
     y_frames = y_frames[mask]
 
-    # init zero arrays to hold x, y with silent frames removed
-    n_sil = (len(x_frames) - 1) * hop + framelen
-    x_sil = np.zeros(n_sil)
-    y_sil = np.zeros(n_sil)
-
-    for i in range(x_frames.shape[0]):
-        x_sil[range(i * hop, i * hop + framelen)] += x_frames[i, :]
-        y_sil[range(i * hop, i * hop + framelen)] += y_frames[i, :]
-
+    x_sil = _overlap_add(x_frames, framelen, hop)
+    y_sil = _overlap_add(y_frames, framelen, hop)
     return x_sil, y_sil
 
 
