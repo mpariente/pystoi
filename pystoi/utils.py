@@ -1,5 +1,6 @@
 import numpy as np
 import scipy
+import functools
 from scipy.signal import resample_poly
 
 EPS = np.finfo("float").eps
@@ -49,6 +50,7 @@ def resample_oct(x, p, q):
     return resample_poly(x, p, q, window=window)
 
 
+@functools.lru_cache(maxsize=None)
 def thirdoct(fs, nfft, num_bands, min_freq):
     """ Returns the 1/3 octave band matrix and its center frequencies
     # Arguments :
