@@ -100,13 +100,12 @@ def stft(x, win_size, fft_size, overlap=4):
     return stft_out
 
 
-def _overlap_and_add(x_frames, framelen, hop):
-    # x.shape = (num_frames, framelen)
+def _overlap_and_add(x_frames, hop):
+    num_frames, framelen = x_frames.shape
     # Compute the number of segments, per frame.
-    num_frames = len(x_frames)
     segments = -(-framelen // hop)  # Divide and round up.
 
-    # Pad the frame_length dimension to segments * hop
+    # Pad the framelen dimension to segments * hop and add n=segments frames
     signal = np.pad(x_frames, ((0, segments), (0, segments * hop - framelen)))
 
     # Reshape to a 3D tensor, splitting the framelen dimension in two
@@ -116,12 +115,11 @@ def _overlap_and_add(x_frames, framelen, hop):
     # Reshape so that signal.shape = (segments * (frame+segments), hop)
     signal = signal.reshape((-1, hop))
 
-    # Now here is the magic!! Beware!!
-    # Remove the last n=segments elements from the first axis
+    # Now behold the magic!! Remove the last n=segments elements from the first axis
     signal = signal[:-segments]
     # Reshape to (segments, frame+segments-1, hop)
     signal = signal.reshape((segments, num_frames + segments - 1, hop))
-    # This has introduced a shift by one
+    # This has introduced a shift by one in all rows
 
     # Now, reduce over the columns and flatten the array to achieve the result
     signal = np.sum(signal, axis=0)
@@ -163,8 +161,8 @@ def remove_silent_frames(x, y, dyn_range, framelen, hop):
     x_frames = x_frames[mask]
     y_frames = y_frames[mask]
 
-    x_sil = _overlap_and_add(x_frames, framelen, hop)
-    y_sil = _overlap_and_add(y_frames, framelen, hop)
+    x_sil = _overlap_and_add(x_frames, hop)
+    y_sil = _overlap_and_add(y_frames, hop)
 
     return x_sil, y_sil
 
