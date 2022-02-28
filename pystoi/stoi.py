@@ -91,7 +91,7 @@ def stoi(x, y, fs_sig, extended=False):
     if extended:  # TODO: Vectorialise this
         x_n = np.array([utils.row_col_normalize(xi) for xi in x_segments])
         y_n = np.array([utils.row_col_normalize(yi) for yi in y_segments])
-        return np.sum(x_n * y_n / N, axis=(1, 2, 3)) / x_n.shape[1]
+        return np.squeeze(np.sum(x_n * y_n / N, axis=(1, 2, 3)) / x_n.shape[1])
 
     else:
         # Find normalization constants and normalize
