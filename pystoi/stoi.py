@@ -46,8 +46,12 @@ def stoi(x, y, fs_sig, extended=False):
             IEEE Transactions on Audio, Speech and Language Processing, 2016.
     """
     if x.shape != y.shape:
-        raise Exception('x and y should have the same length,' +
+        raise Exception('x and y should have the same shape,' +
                         'found {} and {}'.format(x.shape, y.shape))
+
+    if len(x.shape) == 1:  # Add a batch size if missing
+        x = x[None, :]
+        y = y[None, :]
 
     # Resample is fs_sig is different than fs
     if fs_sig != FS:
@@ -58,58 +62,62 @@ def stoi(x, y, fs_sig, extended=False):
     x, y = utils.remove_silent_frames(x, y, DYN_RANGE, N_FRAME, int(N_FRAME/2))
 
     # Take STFT
-    x_spec = utils.stft(x, N_FRAME, NFFT, overlap=2).transpose()
-    y_spec = utils.stft(y, N_FRAME, NFFT, overlap=2).transpose()
+    x_spec = utils.stft(x, N_FRAME, NFFT, overlap=2)
+    y_spec = utils.stft(y, N_FRAME, NFFT, overlap=2)
 
     # Ensure at least 30 frames for intermediate intelligibility
-    if x_spec.shape[-1] < N:
+    mask = ~np.all(x_spec == 0, axis=-1)
+    if np.any(np.sum(mask, axis=-1) < N):
         warnings.warn('Not enough STFT frames to compute intermediate '
                       'intelligibility measure after removing silent '
                       'frames. Returning 1e-5. Please check you wav files',
                       RuntimeWarning)
-        return 1e-5
+        return np.squeeze([1e-5 for _ in range(x)])
 
     # Apply OB matrix to the spectrograms as in Eq. (1)
-    x_tob = np.sqrt(np.matmul(OBM, np.square(np.abs(x_spec))))
-    y_tob = np.sqrt(np.matmul(OBM, np.square(np.abs(y_spec))))
+    x_tob = np.sqrt(np.matmul(np.square(np.abs(x_spec)), OBM.T))
+    y_tob = np.sqrt(np.matmul(np.square(np.abs(y_spec)), OBM.T))
 
-    # Take segments of x_tob, y_tob
+    # Take segments of x_tob, y_tob, shape (batch, num_segments, seg_size, bands)
     x_segments = np.array(
-        [x_tob[:, m - N:m] for m in range(N, x_tob.shape[1] + 1)])
+        [x_tob[:, m - N : m] for m in range(N, x_tob.shape[1] + 1)]
+    ).transpose([1, 0, 2, 3])
+    x_segments = x_segments * mask[:, N-1:, None, None]
     y_segments = np.array(
-        [y_tob[:, m - N:m] for m in range(N, x_tob.shape[1] + 1)])
+        [y_tob[:, m - N : m] for m in range(N, x_tob.shape[1] + 1)]
+    ).transpose([1, 0, 2, 3])
+    y_segments = y_segments * mask[:, N-1:, None, None]
 
-    if extended:
-        x_n = utils.row_col_normalize(x_segments)
-        y_n = utils.row_col_normalize(y_segments)
-        return np.sum(x_n * y_n / N) / x_n.shape[0]
+    if extended:  # TODO: Vectorialise this
+        x_n = np.array([utils.row_col_normalize(xi) for xi in x_segments])
+        y_n = np.array([utils.row_col_normalize(yi) for yi in y_segments])
+        return np.sum(x_n * y_n / N, axis=(1, 2, 3)) / x_n.shape[1]
 
     else:
         # Find normalization constants and normalize
-        normalization_consts = (
-            np.linalg.norm(x_segments, axis=2, keepdims=True) /
-            (np.linalg.norm(y_segments, axis=2, keepdims=True) + utils.EPS))
+        normalization_consts = np.linalg.norm(x_segments, axis=-1, keepdims=True) / (
+            np.linalg.norm(y_segments, axis=-1, keepdims=True) + utils.EPS
+        )
         y_segments_normalized = y_segments * normalization_consts
 
         # Clip as described in [1]
         clip_value = 10 ** (-BETA / 20)
-        y_primes = np.minimum(
-            y_segments_normalized, x_segments * (1 + clip_value))
+        y_primes = np.minimum(y_segments_normalized, x_segments * (1 + clip_value))
 
         # Subtract mean vectors
-        y_primes = y_primes - np.mean(y_primes, axis=2, keepdims=True)
-        x_segments = x_segments - np.mean(x_segments, axis=2, keepdims=True)
+        y_primes = y_primes - np.mean(y_primes, axis=-1, keepdims=True)
+        x_segments = x_segments - np.mean(x_segments, axis=-1, keepdims=True)
 
         # Divide by their norms
-        y_primes /= (np.linalg.norm(y_primes, axis=2, keepdims=True) + utils.EPS)
-        x_segments /= (np.linalg.norm(x_segments, axis=2, keepdims=True) + utils.EPS)
+        y_primes /= np.linalg.norm(y_primes, axis=-1, keepdims=True) + utils.EPS
+        x_segments /= np.linalg.norm(x_segments, axis=-1, keepdims=True) + utils.EPS
         # Find a matrix with entries summing to sum of correlations of vectors
-        correlations_components = y_primes * x_segments
+        correlations_components = np.sum(y_primes * x_segments, axis=-2)
 
         # J, M as in [1], eq.6
-        J = x_segments.shape[0]
+        J = x_segments.shape[2]
         M = x_segments.shape[1]
 
         # Find the mean of all correlations
-        d = np.sum(correlations_components) / (J * M)
-        return d
+        d = np.sum(correlations_components, axis=(-2, -1)) / (J * M)
+        return np.squeeze(d)
