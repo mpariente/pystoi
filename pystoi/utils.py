@@ -181,25 +181,17 @@ def remove_silent_frames(x, y, dyn_range, framelen, hop):
     return x_sil, y_sil
 
 
-def vect_two_norm(x, axis=-1):
-    """ Returns an array of vectors of norms of the rows of matrices from 3D array """
-    return np.sum(np.square(x), axis=axis, keepdims=True)
-
-
 def row_col_normalize(x):
     """ Row and column mean and variance normalize an array of 2D segments """
+    # input shape (batch, num_segments, seg_size, bands)
     # Row mean and variance normalization
     x_normed = x + EPS * np.random.standard_normal(x.shape)
-    x_normed -= np.mean(x_normed, axis=-1, keepdims=True)
-    x_inv = 1. / np.sqrt(vect_two_norm(x_normed))
-    x_diags = np.array(
-        [np.diag(x_inv[i].reshape(-1)) for i in range(x_inv.shape[0])])
-    x_normed = np.matmul(x_diags, x_normed)
+    x_normed -= np.mean(x_normed, axis=-2, keepdims=True)
+    x_inv = 1. / np.linalg.norm(x_normed, axis=-2)
+    x_normed = x_normed * x_inv[..., None, :]
     # Column mean and variance normalization
-    x_normed += + EPS * np.random.standard_normal(x_normed.shape)
-    x_normed -= np.mean(x_normed, axis=1, keepdims=True)
-    x_inv = 1. / np.sqrt(vect_two_norm(x_normed, axis=1))
-    x_diags = np.array(
-        [np.diag(x_inv[i].reshape(-1)) for i in range(x_inv.shape[0])])
-    x_normed = np.matmul(x_normed, x_diags)
+    x_normed += EPS * np.random.standard_normal(x_normed.shape)
+    x_normed -= np.mean(x_normed, axis=-1, keepdims=True)
+    x_inv = 1. / np.linalg.norm(x_normed, axis=-1)
+    x_normed = x_normed * x_inv[..., None]
     return x_normed

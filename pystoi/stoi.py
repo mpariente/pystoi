@@ -82,10 +82,11 @@ def stoi(x, y, fs_sig, extended=False):
     x_segments = utils.segment_frames(x_tob, mask, N)
     y_segments = utils.segment_frames(y_tob, mask, N)
 
-    if extended:  # TODO: Vectorialise this
-        x_n = np.array([utils.row_col_normalize(xi) for xi in x_segments])
-        y_n = np.array([utils.row_col_normalize(yi) for yi in y_segments])
-        return np.squeeze(np.sum(x_n * y_n / N, axis=(1, 2, 3)) / x_n.shape[1])
+    if extended:
+        x_n = utils.row_col_normalize(x_segments)
+        y_n = utils.row_col_normalize(y_segments)
+        d_n = np.mean(np.sum(x_n * y_n, axis=3), axis=2)
+        return np.squeeze(np.mean(d_n, axis=1))
 
     else:
         # Find normalization constants and normalize
