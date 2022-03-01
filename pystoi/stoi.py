@@ -78,10 +78,11 @@ def stoi(x, y, fs_sig, extended=False):
     x_tob = np.sqrt(np.matmul(np.square(np.abs(x_spec)), OBM.T))
     y_tob = np.sqrt(np.matmul(np.square(np.abs(y_spec)), OBM.T))
 
-    # Take segments of x_tob, y_tob, shape (batch, num_segments, seg_size, bands)
+    # Take segments of x_tob, y_tob
     x_segments = utils.segment_frames(x_tob, mask, N)
     y_segments = utils.segment_frames(y_tob, mask, N)
 
+    # From now on the shape is always (batch, num_segments, seg_size, bands)
     if extended:
         x_n = utils.row_col_normalize(x_segments)
         y_n = utils.row_col_normalize(y_segments)
@@ -90,8 +91,8 @@ def stoi(x, y, fs_sig, extended=False):
 
     else:
         # Find normalization constants and normalize
-        normalization_consts = np.linalg.norm(x_segments, axis=-2, keepdims=True) / (
-            np.linalg.norm(y_segments, axis=-2, keepdims=True) + utils.EPS
+        normalization_consts = np.linalg.norm(x_segments, axis=2, keepdims=True) / (
+            np.linalg.norm(y_segments, axis=2, keepdims=True) + utils.EPS
         )
         y_segments_normalized = y_segments * normalization_consts
 
@@ -100,15 +101,15 @@ def stoi(x, y, fs_sig, extended=False):
         y_primes = np.minimum(y_segments_normalized, x_segments * (1 + clip_value))
 
         # Subtract mean vectors
-        y_primes = y_primes - np.mean(y_primes, axis=-2, keepdims=True)
-        x_segments = x_segments - np.mean(x_segments, axis=-2, keepdims=True)
+        y_primes = y_primes - np.mean(y_primes, axis=2, keepdims=True)
+        x_segments = x_segments - np.mean(x_segments, axis=2, keepdims=True)
 
         # Divide by their norms
-        y_primes /= np.linalg.norm(y_primes, axis=-2, keepdims=True) + utils.EPS
-        x_segments /= np.linalg.norm(x_segments, axis=-2, keepdims=True) + utils.EPS
+        y_primes /= np.linalg.norm(y_primes, axis=2, keepdims=True) + utils.EPS
+        x_segments /= np.linalg.norm(x_segments, axis=2, keepdims=True) + utils.EPS
         # Find a matrix with entries summing to sum of correlations of vectors
         correlations_components = np.sum(y_primes * x_segments, axis=-2, keepdims=True)
 
         # Find the mean of all correlations
-        d = np.mean(correlations_components, axis=(-3, -1), keepdims=True)
+        d = np.mean(correlations_components, axis=(1, 3), keepdims=True)
         return np.squeeze(d)
