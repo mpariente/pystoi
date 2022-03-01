@@ -105,8 +105,8 @@ def stoi(x, y, fs_sig, extended=False):
         x_segments = x_segments - np.mean(x_segments, axis=2, keepdims=True)
 
         # Divide by their norms
-        y_primes /= np.linalg.norm(y_primes, axis=2, keepdims=True) + utils.EPS
-        x_segments /= np.linalg.norm(x_segments, axis=2, keepdims=True) + utils.EPS
+        y_primes /= (np.linalg.norm(y_primes, axis=2, keepdims=True) + utils.EPS)
+        x_segments /= (np.linalg.norm(x_segments, axis=2, keepdims=True) + utils.EPS)
         # Find a matrix with entries summing to sum of correlations of vectors
         correlations_components = np.sum(y_primes * x_segments, axis=-2, keepdims=True)
 
