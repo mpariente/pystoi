@@ -134,6 +134,13 @@ def _mask_audio(x, mask):
     ])
 
 
+def _segment_frames(x, mask, seg_size):
+    # TODO: Vectorise this!
+    segments = np.array([x[:, m - seg_size: m] for m in range(seg_size, x.shape[1] + 1)])
+    segments = segments.transpose([1, 0, 2, 3])  # put back batch in the first dimension
+    return segments * mask[:, seg_size - 1:, None, None]
+
+
 def remove_silent_frames(x, y, dyn_range, framelen, hop):
     """ Remove silent frames of x and y based on x
     A frame is excluded if its energy is lower than max(energy) - dyn_range
