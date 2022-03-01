@@ -112,4 +112,5 @@ def stoi(x, y, fs_sig, extended=False):
 
         # Find the mean of all correlations
         d = np.mean(correlations_components, axis=(1, 3), keepdims=True)
+        d *= np.mean(mask, axis=1, keepdims=True)[..., None, None]
         return np.squeeze(d)
