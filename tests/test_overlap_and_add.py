@@ -54,7 +54,7 @@ def test_pystoi_silence(extended):
     audio = np.array(audio)
     res = stoi(audio, audio, fs, extended)
     print(batch_size, fs, extended, res)
-    assert res.shape == () if batch_size == 1 else (batch_size,)
+    assert res.shape == x.shape[:-1]
 
 
 def test_vectorisation():
@@ -62,7 +62,7 @@ def test_vectorisation():
     batch_size = 4
     x = np.random.random((batch_size, 100 * N_FRAME))
     y = np.random.random((batch_size, 100 * N_FRAME))
+    res = np.array([stoi(xi, yi, FS) for xi, yi in zip(x, y)])
     res_vec = stoi(x, y, FS)
-    res_old = np.array([stoi(xi, yi, FS) for xi, yi in zip(x, y)])
-    assert res_vec.shape == (batch_size,)
-    assert np.allclose(res_old, res_vec)
+    assert res_vec.shape == x.shape[:-1]
+    assert np.allclose(res, res_vec)
