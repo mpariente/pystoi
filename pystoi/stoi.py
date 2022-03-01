@@ -90,8 +90,8 @@ def stoi(x, y, fs_sig, extended=False):
 
     else:
         # Find normalization constants and normalize
-        normalization_consts = np.linalg.norm(x_segments, axis=-1, keepdims=True) / (
-            np.linalg.norm(y_segments, axis=-1, keepdims=True) + utils.EPS
+        normalization_consts = np.linalg.norm(x_segments, axis=-2, keepdims=True) / (
+            np.linalg.norm(y_segments, axis=-2, keepdims=True) + utils.EPS
         )
         y_segments_normalized = y_segments * normalization_consts
 
@@ -100,19 +100,15 @@ def stoi(x, y, fs_sig, extended=False):
         y_primes = np.minimum(y_segments_normalized, x_segments * (1 + clip_value))
 
         # Subtract mean vectors
-        y_primes = y_primes - np.mean(y_primes, axis=-1, keepdims=True)
-        x_segments = x_segments - np.mean(x_segments, axis=-1, keepdims=True)
+        y_primes = y_primes - np.mean(y_primes, axis=-2, keepdims=True)
+        x_segments = x_segments - np.mean(x_segments, axis=-2, keepdims=True)
 
         # Divide by their norms
-        y_primes /= np.linalg.norm(y_primes, axis=-1, keepdims=True) + utils.EPS
-        x_segments /= np.linalg.norm(x_segments, axis=-1, keepdims=True) + utils.EPS
+        y_primes /= np.linalg.norm(y_primes, axis=-2, keepdims=True) + utils.EPS
+        x_segments /= np.linalg.norm(x_segments, axis=-2, keepdims=True) + utils.EPS
         # Find a matrix with entries summing to sum of correlations of vectors
-        correlations_components = np.sum(y_primes * x_segments, axis=-2)
-
-        # J, M as in [1], eq.6
-        J = x_segments.shape[2]
-        M = x_segments.shape[1]
+        correlations_components = np.sum(y_primes * x_segments, axis=-2, keepdims=True)
 
         # Find the mean of all correlations
-        d = np.sum(correlations_components, axis=(-2, -1)) / (J * M)
+        d = np.mean(correlations_components, axis=(-3, -1), keepdims=True)
         return np.squeeze(d)
