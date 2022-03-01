@@ -36,7 +36,7 @@ def test_pystoi_run(batch_size, fs, extended):
     x = np.random.randn(batch_size, N)
     res = stoi(x, x, fs, extended)
     print(batch_size, fs, extended, res)
-    assert res.shape == () if batch_size == 1 else (batch_size,)
+    assert res.shape == x.shape[:-1]
 
 
 @pytest.mark.parametrize("extended", [True, False])

@@ -19,7 +19,8 @@ def stoi(x, y, fs_sig, extended=False):
     Computes the STOI (See [1][2]) of a denoised signal compared to a clean
     signal, The output is expected to have a monotonic relation with the
     subjective speech-intelligibility, where a higher score denotes better
-    speech intelligibility.
+    speech intelligibility. Accepts either a single waveform or a batch of
+    waveforms stored in a numpy array.
 
     # Arguments
         x (np.ndarray): clean original speech
@@ -28,8 +29,9 @@ def stoi(x, y, fs_sig, extended=False):
         extended (bool): Boolean, whether to use the extended STOI described in [3]
 
     # Returns
-        float: Short time objective intelligibility measure between clean and
-        denoised speech
+        float or np.ndarray: Short time objective intelligibility measure between
+        clean and denoised speech. Returns float if called with a single waveform,
+        np.ndarray if called with a batch of waveforms
 
     # Raises
         AssertionError : if x and y have different lengths
@@ -49,6 +51,7 @@ def stoi(x, y, fs_sig, extended=False):
         raise Exception('x and y should have the same shape,' +
                         'found {} and {}'.format(x.shape, y.shape))
 
+    out_shape = x.shape[:-1]
     if len(x.shape) == 1:  # Add a batch size if missing, shape (batch, num_samples)
         x = x[None, :]
         y = y[None, :]
@@ -72,7 +75,7 @@ def stoi(x, y, fs_sig, extended=False):
                       'intelligibility measure after removing silent '
                       'frames. Returning 1e-5. Please check you wav files',
                       RuntimeWarning)
-        return np.squeeze([1e-5 for _ in range(x)])
+        return np.array([1e-5 for _ in range(x)]).reshape(out_shape)
 
     # Apply OB matrix to the spectrograms as in Eq. (1), shape (batch, frames, bands)
     x_tob = np.sqrt(np.matmul(np.square(np.abs(x_spec)), OBM.T))
@@ -87,7 +90,7 @@ def stoi(x, y, fs_sig, extended=False):
         x_n = utils.row_col_normalize(x_segments)
         y_n = utils.row_col_normalize(y_segments)
         d_n = np.mean(np.sum(x_n * y_n, axis=3), axis=2)
-        return np.squeeze(np.mean(d_n, axis=1))
+        return np.mean(d_n, axis=1).reshape(out_shape)
 
     else:
         # Find normalization constants and normalize
@@ -115,4 +118,4 @@ def stoi(x, y, fs_sig, extended=False):
         # Exclude the contribution of silent frames from the calculation of the mean
         d *= np.mean(mask, axis=1, keepdims=True)[..., None, None]
         # Return just a float if stoi was called with a single waveform
-        return np.squeeze(d)
+        return np.squeeze(d).reshape(out_shape)
