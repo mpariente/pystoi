@@ -49,7 +49,7 @@ def stoi(x, y, fs_sig, extended=False):
         raise Exception('x and y should have the same shape,' +
                         'found {} and {}'.format(x.shape, y.shape))
 
-    if len(x.shape) == 1:  # Add a batch size if missing
+    if len(x.shape) == 1:  # Add a batch size if missing, shape (batch, num_samples)
         x = x[None, :]
         y = y[None, :]
 
@@ -61,12 +61,12 @@ def stoi(x, y, fs_sig, extended=False):
     # Remove silent frames
     x, y = utils.remove_silent_frames(x, y, DYN_RANGE, N_FRAME, int(N_FRAME/2))
 
-    # Take STFT
+    # Take STFT, shape (batch, num_frames, n_fft//2 + 1)
     x_spec = utils.stft(x, N_FRAME, NFFT, overlap=2)
     y_spec = utils.stft(y, N_FRAME, NFFT, overlap=2)
 
     # Ensure at least 30 frames for intermediate intelligibility
-    mask = ~np.all(x_spec == 0, axis=-1)
+    mask = ~np.all(x_spec == 0, axis=-1)  # Check for frames with non-zero values
     if np.any(np.sum(mask, axis=-1) < N):
         warnings.warn('Not enough STFT frames to compute intermediate '
                       'intelligibility measure after removing silent '
@@ -74,7 +74,7 @@ def stoi(x, y, fs_sig, extended=False):
                       RuntimeWarning)
         return np.squeeze([1e-5 for _ in range(x)])
 
-    # Apply OB matrix to the spectrograms as in Eq. (1)
+    # Apply OB matrix to the spectrograms as in Eq. (1), shape (batch, frames, bands)
     x_tob = np.sqrt(np.matmul(np.square(np.abs(x_spec)), OBM.T))
     y_tob = np.sqrt(np.matmul(np.square(np.abs(y_spec)), OBM.T))
 
