@@ -128,16 +128,16 @@ def _overlap_and_add(x_frames, hop):
     return signal
 
 
-def _mask_audio(x, mask):
-    return np.array([
-        np.pad(xi[mi], ((0, len(xi) - np.sum(mi)), (0, 0))) for xi, mi in zip(x, mask)
-    ])
-
-
 def segment_frames(x, mask, seg_size):
     segments = np.array([x[:, m - seg_size: m] for m in range(seg_size, x.shape[1] + 1)])
     segments = segments.transpose([1, 0, 2, 3])  # put back batch in the first dimension
     return segments * mask[:, seg_size - 1:, None, None]
+
+
+def _mask_audio(x, mask):
+    return np.array([
+        np.pad(xi[mi], ((0, len(xi) - np.sum(mi)), (0, 0))) for xi, mi in zip(x, mask)
+    ])
 
 
 def remove_silent_frames(x, y, dyn_range, framelen, hop):
@@ -151,8 +151,8 @@ def remove_silent_frames(x, y, dyn_range, framelen, hop):
         framelen : Window size for energy evaluation
         hop : Hop size for energy evaluation
     # Returns :
-        x without the silent frames
-        y without the silent frames (aligned to x)
+        x without the silent frames, zero-padded to the original length
+        y without the silent frames, zero-padded to the original length (aligned to x)
     """
     # Compute Mask
     w = np.hanning(framelen + 2)[1:-1]
@@ -171,7 +171,7 @@ def remove_silent_frames(x, y, dyn_range, framelen, hop):
     # with respect to maximum clean speech energy frame
     mask = (np.max(x_energies) - dyn_range - x_energies) < 0
 
-    # Remove silent frames by masking
+    # Remove silent frames and pad with zeroes
     x_frames = _mask_audio(x_frames, mask)
     y_frames = _mask_audio(y_frames, mask)
 
