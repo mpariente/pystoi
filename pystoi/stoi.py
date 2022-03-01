@@ -79,8 +79,8 @@ def stoi(x, y, fs_sig, extended=False):
     y_tob = np.sqrt(np.matmul(np.square(np.abs(y_spec)), OBM.T))
 
     # Take segments of x_tob, y_tob, shape (batch, num_segments, seg_size, bands)
-    x_segments = utils._segment_frames(x_tob, mask, N)
-    y_segments = utils._segment_frames(y_tob, mask, N)
+    x_segments = utils.segment_frames(x_tob, mask, N)
+    y_segments = utils.segment_frames(y_tob, mask, N)
 
     if extended:  # TODO: Vectorialise this
         x_n = np.array([utils.row_col_normalize(xi) for xi in x_segments])

@@ -134,7 +134,7 @@ def _mask_audio(x, mask):
     ])
 
 
-def _segment_frames(x, mask, seg_size):
+def segment_frames(x, mask, seg_size):
     segments = np.array([x[:, m - seg_size: m] for m in range(seg_size, x.shape[1] + 1)])
     segments = segments.transpose([1, 0, 2, 3])  # put back batch in the first dimension
     return segments * mask[:, seg_size - 1:, None, None]
