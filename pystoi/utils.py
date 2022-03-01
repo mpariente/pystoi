@@ -186,10 +186,10 @@ def row_col_normalize(x):
     # input shape (batch, num_segments, seg_size, bands)
     # Row mean and variance normalization
     x_normed = x - np.mean(x, axis=-2, keepdims=True)
-    x_inv = 1. / np.linalg.norm(x_normed, axis=-2)
-    x_normed = x_normed * x_inv[..., None, :]
+    x_inv = 1. / np.linalg.norm(x_normed, axis=-2, keepdims=True)
+    x_normed = x_normed * x_inv
     # Column mean and variance normalization
     x_normed -= np.mean(x_normed, axis=-1, keepdims=True)
-    x_inv = 1. / np.linalg.norm(x_normed, axis=-1)
-    x_normed = x_normed * x_inv[..., None]
+    x_inv = 1. / np.linalg.norm(x_normed, axis=-1, keepdims=True)
+    x_normed = x_normed * x_inv
     return x_normed
