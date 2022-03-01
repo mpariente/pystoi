@@ -91,9 +91,9 @@ def stoi(x, y, fs_sig, extended=False):
 
     else:
         # Find normalization constants and normalize
-        normalization_consts = np.linalg.norm(x_segments, axis=2, keepdims=True) / (
-            np.linalg.norm(y_segments, axis=2, keepdims=True) + utils.EPS
-        )
+        normalization_consts = (
+            np.linalg.norm(x_segments, axis=2, keepdims=True) /
+            (np.linalg.norm(y_segments, axis=2, keepdims=True) + utils.EPS))
         y_segments_normalized = y_segments * normalization_consts
 
         # Clip as described in [1]
