@@ -75,7 +75,7 @@ def stoi(x, y, fs_sig, extended=False):
                       'intelligibility measure after removing silent '
                       'frames. Returning 1e-5. Please check you wav files',
                       RuntimeWarning)
-        return np.array([1e-5 for _ in range(x)]).reshape(out_shape)
+        return np.array([1e-5 for _ in range(x.shape[0])]).reshape(out_shape)
 
     # Apply OB matrix to the spectrograms as in Eq. (1), shape (batch, frames, bands)
     x_tob = np.sqrt(np.matmul(np.square(np.abs(x_spec)), OBM.T))

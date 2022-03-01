@@ -40,6 +40,17 @@ def test_pystoi_run(batch_size, fs, extended):
 
 
 @pytest.mark.parametrize("extended", [True, False])
+@pytest.mark.parametrize("batch_size", [1, 4])
+def test_pystoi_complete_silence(batch_size, extended):
+    fs = 16000
+    N = fs * 4  # 4 seconds of random audio
+    x = np.zeros((batch_size, N))
+    res = stoi(x, x, fs, extended)
+    print(batch_size, fs, extended, res)
+    assert res.shape == x.shape[:-1]
+
+
+@pytest.mark.parametrize("extended", [True, False])
 def test_pystoi_silence(extended):
     rng = np.random.default_rng(seed=0)
     batch_size = 4
