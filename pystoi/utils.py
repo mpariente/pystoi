@@ -184,12 +184,10 @@ def remove_silent_frames(x, y, dyn_range, framelen, hop):
 def row_col_normalize(x):
     """ Row and column mean and variance normalize an array of 2D segments """
     # input shape (batch, num_segments, seg_size, bands)
-    # Row mean and variance normalization
+    # Row mean and variance normalization -- axis: seg_size
     x_normed = x - np.mean(x, axis=-2, keepdims=True)
-    x_inv = 1. / np.linalg.norm(x_normed, axis=-2, keepdims=True)
-    x_normed = x_normed * x_inv
-    # Column mean and variance normalization
+    x_normed = x_normed / (np.linalg.norm(x_normed, axis=-2, keepdims=True) + EPS)
+    # Column mean and variance normalization -- axis: bands
     x_normed -= np.mean(x_normed, axis=-1, keepdims=True)
-    x_inv = 1. / np.linalg.norm(x_normed, axis=-1, keepdims=True)
-    x_normed = x_normed * x_inv
+    x_normed = x_normed / (np.linalg.norm(x_normed, axis=-1, keepdims=True) + EPS)
     return x_normed
