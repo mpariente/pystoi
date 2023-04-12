@@ -96,7 +96,7 @@ def stft(x, win_size, fft_size, overlap=4):
     hop = int(win_size / overlap)
     w = np.hanning(win_size + 2)[1: -1]  # = matlab.hanning(win_size)
     stft_out = np.array([np.fft.rfft(w * x[i:i + win_size], n=fft_size)
-                        for i in range(0, len(x) - win_size, hop)])
+                        for i in range(0, len(x) - win_size + 1, hop)])
     return stft_out
 
 
@@ -146,9 +146,9 @@ def remove_silent_frames(x, y, dyn_range, framelen, hop):
     w = np.hanning(framelen + 2)[1:-1]
 
     x_frames = np.array(
-        [w * x[i:i + framelen] for i in range(0, len(x) - framelen, hop)])
+        [w * x[i:i + framelen] for i in range(0, len(x) - framelen + 1, hop)])
     y_frames = np.array(
-        [w * y[i:i + framelen] for i in range(0, len(x) - framelen, hop)])
+        [w * y[i:i + framelen] for i in range(0, len(x) - framelen + 1, hop)])
 
     # Compute energies in dB
     x_energies = 20 * np.log10(np.linalg.norm(x_frames, axis=1) + EPS)
