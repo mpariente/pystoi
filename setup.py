@@ -6,7 +6,7 @@ with open("README.md", encoding='utf-8') as fh:
 
 setup(
     name='pystoi',
-    version='0.3.3',
+    version='0.4.0',
     description='Computes Short Term Objective Intelligibility measure',
     author='Manuel Pariente',
     author_email='pariente.mnl@gmail.com',
