@@ -23,6 +23,19 @@ denoised, fs = sf.read('path/to/denoised/audio')
 d = stoi(clean, denoised, fs, extended=False)
 ```
 
+### Running the Octave tests 
+
+```bash 
+sudo apt update 
+sudo apt install octave octave-signal 
+pip install oct2py
+```
+
+```bash
+python -m pytest tests/test_python_octave.py
+python -m pytest tests/test_stoi_octave.py
+```
+
 ### Matlab code & Testing
 
 All the Matlab code in this repo is taken from or adapted from the code available [here](http://www.ceestaal.nl/code/) (STOI – Short-Time Objective Intelligibility Measure – ) written by Cees Taal.
