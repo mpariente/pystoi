@@ -46,13 +46,17 @@ def stoi(x, y, fs_sig, extended=False):
             IEEE Transactions on Audio, Speech and Language Processing, 2016.
     """
     if x.shape != y.shape:
-        raise Exception('x and y should have the same length,' +
+        raise Exception('x and y should have the same length,'
                         'found {} and {}'.format(x.shape, y.shape))
 
     # Resample is fs_sig is different than fs
     if fs_sig != FS:
         x = utils.resample_oct(x, FS, fs_sig)
         y = utils.resample_oct(y, FS, fs_sig)
+
+    if min(x.shape[0], y.shape[0]) < N_FRAME:
+        raise Exception('x and y should at least {} miliseconds long'
+                        .format(int(1000 * float(N_FRAME) / float(FS))))
 
     # Remove silent frames
     x, y = utils.remove_silent_frames(x, y, DYN_RANGE, N_FRAME, int(N_FRAME/2))
@@ -65,7 +69,10 @@ def stoi(x, y, fs_sig, extended=False):
     if x_spec.shape[-1] < N:
         warnings.warn('Not enough STFT frames to compute intermediate '
                       'intelligibility measure after removing silent '
-                      'frames. Returning 1e-5. Please check you wav files',
+                      'frames. At least {} seconds are required, '
+                      'but only {} were found. '
+                      'Returning 1e-5. Please check you wav files'
+                      .format(((N - 1) * N_FRAME + NFFT) / FS, x.shape[0] / FS),
                       RuntimeWarning)
         return 1e-5
 
